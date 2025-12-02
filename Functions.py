@@ -1,6 +1,9 @@
 import numpy as np
 
-
+def boxcar_average_numpy(data, window_size):
+    window = np.ones(window_size) / window_size
+    smoothed_data = np.convolve(data, window, mode='same')
+    return smoothed_data
 
 def velocity_to_energy(velocity, mass, e_unit = "Joule", v_unit = "m/s"):
     """
