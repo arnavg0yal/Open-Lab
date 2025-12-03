@@ -8,23 +8,23 @@ from Functions import *
 from scipy.signal import find_peaks
 
 window_size = 10
-
-calibration_plot_save = "detector_calibration_plots"
+calibration_folder = "11_20_2025_calibration"
+calibration_plot_save = os.path.join(calibration_folder,"detector_calibration_plots")
 if not os.path.exists(calibration_plot_save):
     os.makedirs(calibration_plot_save)
 
-calibration_folder = "11_20_2025_calibration"
-Cs137_CLYC_CH0 = os.path.join(calibration_folder,r"Cs137_CLYC_11_20_2025_test\UNFILTERED\CH0@DT5730S_2263_Espectrum_Cs137_CLYC_11_20_2025_test_20251120_175941.txt")
-Cs137_CLYC_CH1 = os.path.join(calibration_folder,r"Cs137_CLYC_11_20_2025_test\UNFILTERED\CH1@DT5730S_2263_Espectrum_Cs137_CLYC_11_20_2025_test_20251120_175941.txt")
 
-Na22_CLYC_CH0 = os.path.join(calibration_folder,r"Na22_CLYC_11_20_2025_test\UNFILTERED\CH0@DT5730S_2263_Espectrum_Na22_CLYC_11_20_2025_test_20251120_180528.txt")
-Na22_CLYC_CH1 = os.path.join(calibration_folder,r"Na22_CLYC_11_20_2025_test\UNFILTERED\CH1@DT5730S_2263_Espectrum_Na22_CLYC_11_20_2025_test_20251120_180528.txt")
+Cs137_CLYC_CH0 = os.path.join(calibration_folder,r"data\CH0@DT5730S_2263_Espectrum_Cs137_CLYC_11_20_2025_test_20251120_175941.txt")
+Cs137_CLYC_CH1 = os.path.join(calibration_folder,r"data\CH1@DT5730S_2263_Espectrum_Cs137_CLYC_11_20_2025_test_20251120_175941.txt")
 
-Cs137_OG_CH0 = os.path.join(calibration_folder,r"Cs137_OG_11_20_2025_test\UNFILTERED\CH0@DT5730S_2263_Espectrum_Cs137_OG_11_20_2025_test_20251120_174405.txt")
-Cs137_OG_CH1 = os.path.join(calibration_folder,r"Cs137_OG_11_20_2025_test\UNFILTERED\CH1@DT5730S_2263_Espectrum_Cs137_OG_11_20_2025_test_20251120_174405.txt")
+Na22_CLYC_CH0 = os.path.join(calibration_folder,r"data\CH0@DT5730S_2263_Espectrum_Na22_CLYC_11_20_2025_test_20251120_180528.txt")
+Na22_CLYC_CH1 = os.path.join(calibration_folder,r"data\CH1@DT5730S_2263_Espectrum_Na22_CLYC_11_20_2025_test_20251120_180528.txt")
 
-Na22_OG_CH0 = os.path.join(calibration_folder, r"Na22_OG_11_20_2025_test\UNFILTERED\CH0@DT5730S_2263_Espectrum_Na22_OG_11_20_2025_test_20251120_174621.txt")
-Na22_OG_CH1 = os.path.join(calibration_folder,r"Na22_OG_11_20_2025_test\UNFILTERED\CH1@DT5730S_2263_Espectrum_Na22_OG_11_20_2025_test_20251120_174621.txt")
+Cs137_OG_CH0 = os.path.join(calibration_folder,r"data\CH0@DT5730S_2263_Espectrum_Cs137_OG_11_20_2025_test_20251120_174405.txt")
+Cs137_OG_CH1 = os.path.join(calibration_folder,r"data\CH1@DT5730S_2263_Espectrum_Cs137_OG_11_20_2025_test_20251120_174405.txt")
+
+Na22_OG_CH0 = os.path.join(calibration_folder, r"data\CH0@DT5730S_2263_Espectrum_Na22_OG_11_20_2025_test_20251120_174621.txt")
+Na22_OG_CH1 = os.path.join(calibration_folder,r"data\CH1@DT5730S_2263_Espectrum_Na22_OG_11_20_2025_test_20251120_174621.txt")
 
 CH0_files = [Cs137_CLYC_CH0, Na22_CLYC_CH0, Cs137_OG_CH0, Na22_OG_CH0]
 CH1_files = [Cs137_CLYC_CH1, Na22_CLYC_CH1, Cs137_OG_CH1, Na22_OG_CH1]
