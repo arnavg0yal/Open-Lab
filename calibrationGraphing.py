@@ -7,13 +7,17 @@ from fileReader import compassReader
 from Functions import *
 from scipy.signal import find_peaks
 
+
+#window size for boxcar averaging
 window_size = 10
+
+#folder to save calibration plots
 calibration_folder = "11_20_2025_calibration"
 calibration_plot_save = os.path.join(calibration_folder,"detector_calibration_plots")
 if not os.path.exists(calibration_plot_save):
     os.makedirs(calibration_plot_save)
 
-
+#loading calibration data files
 Cs137_CLYC_CH0 = os.path.join(calibration_folder,r"data\CH0@DT5730S_2263_Espectrum_Cs137_CLYC_11_20_2025_test_20251120_175941.txt")
 Cs137_CLYC_CH1 = os.path.join(calibration_folder,r"data\CH1@DT5730S_2263_Espectrum_Cs137_CLYC_11_20_2025_test_20251120_175941.txt")
 
@@ -26,6 +30,8 @@ Cs137_OG_CH1 = os.path.join(calibration_folder,r"data\CH1@DT5730S_2263_Espectrum
 Na22_OG_CH0 = os.path.join(calibration_folder, r"data\CH0@DT5730S_2263_Espectrum_Na22_OG_11_20_2025_test_20251120_174621.txt")
 Na22_OG_CH1 = os.path.join(calibration_folder,r"data\CH1@DT5730S_2263_Espectrum_Na22_OG_11_20_2025_test_20251120_174621.txt")
 
+#lists of files, isotopes, and detectors
+
 CH0_files = [Cs137_CLYC_CH0, Na22_CLYC_CH0, Cs137_OG_CH0, Na22_OG_CH0]
 CH1_files = [Cs137_CLYC_CH1, Na22_CLYC_CH1, Cs137_OG_CH1, Na22_OG_CH1]
 
@@ -36,9 +42,15 @@ calibration_factors = []
 
 N = len(CH0_files)
 
+#For loop that plots and calculates calibration factors
+#notably, this is not automated, and is slighly hardcoded for peak identification
+#because we only need to calibrate this one time, I did not make this more general
+
 for i in range(N):
     if i != 0:
         pass
+
+
     CH0_file = CH0_files[i]
     CH1_file = CH1_files[i]
     isotope = isotopes[i]
@@ -64,6 +76,7 @@ for i in range(N):
    
     channels = np.arange(len(CH0_data))
 
+    #plotting and calculation happens here
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))
     if detector== "CLYC":
@@ -71,10 +84,11 @@ for i in range(N):
         peak_channels = channels[peak_indices]
         plt.scatter(peak_channels, data[peak_indices], color='red', label='Detected Peaks')
         if isotope == "Na-22":
-            plt.axvline(x = peak_channels[14], color='green', linestyle='--', label='1275 keV Peak')
-            plt.axvline(x = peak_channels[7], color='orange', linestyle='--', label='511 keV Peak')
+            # plt.axvline(x = peak_channels[14], color='green', linestyle='--', label='1275 keV Peak')
+            plt.axvline(x = peak_channels[14], color='orange', linestyle='--', label='511 keV Peak')
+            #note that the index is 14. This is hardcoded based on observing the graph
 
-            calibration_factor = 1275 / peak_channels[14]
+            calibration_factor = anhillation_peak / peak_channels[14]
             print(f"Calibration factor for {isotope} with {detector}: {calibration_factor:.4f} keV/channel")
         if isotope == "Cs-137":
             plt.axvline(x = peak_channels[19], color='green', linestyle='--', label='662 keV Peak')
@@ -113,7 +127,7 @@ for i in range(N):
     ax.legend()
     ax.set_title(f"{isotope} spectrum with {detector} detector")
     if detector == "Organic Glass":
-        ax.set_xlim(0, 500)
+        ax.set_xlim(0, 350)
     plt.savefig(os.path.join(calibration_plot_save, f"{isotope}_{detector}_spectrum.png"))
     # plt.show()
 
@@ -122,6 +136,6 @@ calibration_dict = {
     "Detector": detectors,
     "Calibration Factor (keV/channel)": calibration_factors
 }
-
+#makes and saves dataframe of calibration factors
 calibration_df = pd.DataFrame(calibration_dict)
 calibration_df.to_csv(os.path.join(calibration_plot_save, "calibration_factors.csv"), index=False)
