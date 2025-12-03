@@ -145,3 +145,37 @@ def fractional_solid_angle(radius, distance, r_unit = "m", d_unit = "m"):
 
     return solid_angle
 
+
+def comptonGamma(E0, theta):
+    """
+    Calculate the energy of a Compton scattered gamma photon.
+
+    Parameters:
+    E0 (float): Initial energy of the gamma photon in keV.
+    theta (float): Scattering angle in degrees.
+
+    Returns:
+    float: Energy of the scattered gamma photon in keV.
+    """
+    # Convert angle from degrees to radians
+    theta_rad = np.radians(theta)
+    
+    # Compton scattering formula
+    E_gamma = E0 / (1 + (E0 / 511) * (1 - np.cos(theta_rad)))
+    
+    return E_gamma
+
+def comptonElectron(E0, theta):
+    """
+    Calculate the energy of the Compton scattered electron.
+
+    Parameters:
+    E0 (float): Initial energy of the gamma photon in keV.
+    theta (float): Scattering angle in degrees.
+
+    Returns:
+    float: Energy of the scattered electron in keV.
+    """
+    E_gamma = comptonGamma(E0, theta)
+    E_electron = E0 - E_gamma
+    return E_electron
