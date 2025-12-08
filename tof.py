@@ -10,8 +10,13 @@ filtered_dir = os.path.join(data_dir, "Filtered")
 unfiltered_dir = os.path.join(data_dir, "Unfiltered")
 raw_dir = os.path.join(data_dir, "Raw")
 
+plotting_dir = os.path.join(data_dir, "Plotting")
+if not os.path.exists(plotting_dir):
+    os.makedirs(plotting_dir)
+
 distance = 0.804 # meters
 time_conversion_factor = 1
+joule_to_ev = 1 / 1.602e-19
 
 detector_channels = []
 spectrum_types = []
@@ -34,6 +39,9 @@ tof_time = tof_channels * time_conversion_factor
 
 tof_velocity, tof_energy = time_of_flight(distance, tof_time, d_unit="m", t_unit="ns", mass=1.675e-27)
 
-plt.plot(tof_energy, tof_data, drawstyle='steps-mid')
-plt.show()
+plt.plot(tof_energy * joule_to_ev, tof_data, drawstyle='steps-mid')
+plt.xlabel("Neutron Energy (eV)")
+plt.ylabel("Counts")
+plt.savefig(os.path.join(plotting_dir, "tof_energy_spectrum.png"))
+# plt.show()
 
