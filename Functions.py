@@ -179,3 +179,18 @@ def comptonElectron(E0, theta):
     E_gamma = comptonGamma(E0, theta)
     E_electron = E0 - E_gamma
     return E_electron
+
+import numpy as np
+
+def rebin_uniform(t, counts, nbins_new):
+    n_old = len(counts)
+    factor = n_old // nbins_new
+
+    # Trim to an integer multiple
+    counts_trim = counts[:factor * nbins_new]
+    t_trim = t[:factor * nbins_new]
+
+    counts_new = counts_trim.reshape(nbins_new, factor).sum(axis=1)
+    t_new = t_trim.reshape(nbins_new, factor).mean(axis=1)
+
+    return t_new, counts_new

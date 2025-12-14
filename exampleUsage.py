@@ -10,9 +10,12 @@ from matplotlib import pyplot as plt
 # import the parser to use it
 from pulseParser import WaveBinFile
 
+bare_spectrum_CH0_file = "binary_files/DataF_CH0@DT5730S_2263_New_PuBe_ToF_12_4_25.BIN"
+
+
 # Example 1
 # Plot the first, second and last pulse recorded
-binFileV1 = WaveBinFile('Data_CH0@DT5730_1660_Cs137_group1.bin', version=1)
+binFileV1 = WaveBinFile(bare_spectrum_CH0_file, version=2)
 totalN = binFileV1.totalNumberOfPulses
 print(
     "Version {0} test data. Board number {1}, Channel number {2}. There are {3} pulses in total."
@@ -31,11 +34,11 @@ ax.plot(lastPulse['Samples'], label='Last pulse')
 ax.set_xlabel('Sample number')
 ax.set_ylabel('ADC unit')
 ax.legend()
-# plt.show()
+plt.show()
 
 # Example 2
 # Plot the pulse height distribution
-binFileV2 = WaveBinFile('Data_CH0@DT5730_1660_Cs137_group1.bin', version=1)
+binFileV2 = WaveBinFile(bare_spectrum_CH0_file, version=2)
 totalN = binFileV2.totalNumberOfPulses
 print(
     "Version {0} test data. Board number {1}, Channel number {2}. There are {3} pulses in total."
@@ -72,7 +75,7 @@ plt.show()
 
 # Example 3
 # Plot the time stamp of each pulse (ps units)
-binFileV3 = WaveBinFile('Data_CH0@DT5730_1660_Cs137_group1.bin', version=1)
+binFileV3 = WaveBinFile(bare_spectrum_CH0_file, version=2)
 totalN = binFileV3.totalNumberOfPulses
 print(
     "Version {0} test data. Board number {1}, Channel number {2}. There are {3} pulses in total."

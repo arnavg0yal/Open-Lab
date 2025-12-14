@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from Functions import *
 from fileReader import compassReader
 import os
+import pandas as pd
 
 #data directories
 shadowbar_data_directory = "PuBe_ToF_12_8_25_Shadowbar"
@@ -46,23 +47,90 @@ shadowbar_tof_data = tof_spectra[0]
 bare_tof_data = tof_spectra[1]
 calibration_tof_data = tof_spectra[2]
 
+net2 = bare_tof_data / bare_measurement_time- shadowbar_tof_data / shadowbar_measurement_time
+net2 = net2 * 48 * 60 * 60
+
+where_shadow_not_0 = np.where(shadowbar_tof_data >0)    
+where_bare_not_0 = np.where(bare_tof_data >0)
+where_net2_not_0 = np.where(net2 >0)
+
+net2 = net2[where_net2_not_0]
+shadowbar_tof_data = shadowbar_tof_data[where_shadow_not_0]
+bare_tof_data = bare_tof_data[where_bare_not_0]
+
+
+plt.plot(bare_tof_data, label = "Bare Spectrum")
+plt.plot(shadowbar_tof_data, label = "Shadowbar Spectrum")
+plt.plot(net2, label = "Net Spectrum")
+plt.xlabel("Channels")
+plt.ylabel("Counts (Normalized)")
+plt.legend()
+plt.show()
+
+# print(sum(shadowbar_tof_data), "HERE")
+
 #normalizing data by measurement time
-shadowbar_tof_data = shadowbar_tof_data #/ shadowbar_measurement_time
-bare_tof_data = bare_tof_data #/ bare_measurement_time
+shadowbar_tof_data = shadowbar_tof_data / shadowbar_measurement_time
+bare_tof_data = bare_tof_data / bare_measurement_time
+
 
 
 #applying boxcar moving average filter to data to smooth out fluctuations
-shadowbar_tof_data = boxcar_average_numpy(shadowbar_tof_data, window_size=5)
-bare_tof_data = boxcar_average_numpy(bare_tof_data, window_size=5)
+# shadowbar_tof_data = boxcar_average_numpy(shadowbar_tof_data, window_size=5)
+# bare_tof_data = boxcar_average_numpy(bare_tof_data, window_size=5)
+ 
+net_data = 48 * 60 * 60* (bare_tof_data - shadowbar_tof_data)
+
+big_peak_index = np.argmax(net_data)
+calibration_peak_index = np.argmax(calibration_tof_data)
+
+channels = np.arange(len(calibration_tof_data))
+channels -= calibration_peak_index
+time_ns_calibration_factor = maximum_energy_time / (channels[big_peak_index] - channels[calibration_peak_index])
+time_ns = channels * time_ns_calibration_factor
+
+where_not_zero = np.where(net_data > 0)
+net_data = net_data[where_not_zero]
+time_ns = time_ns[where_not_zero]
+
+baseline_average = np.average(net_data[:30])
+
+net_data = net_data - baseline_average
+net_data = np.where(net_data <0, 0, net_data)
 
 
+# time_ns, net_data = rebin_uniform(time_ns, net_data, 30)
 
+plt.plot(time_ns, net_data, label = "Net Spectrum")
+plt.xlabel("Time-of-Flight (ns)")
+plt.ylabel("Counts (Normalized)")
+plt.yscale('log')
+plt.savefig(os.path.join(final_plottting_directory, "Final_Net_TOF_Spectrum.png"))
+plt.show()
+plt.clf()
+
+where_delta_t_positive = np.where(time_ns > 0)
+time_ns = time_ns[where_delta_t_positive]
+net_data = net_data[where_delta_t_positive]
+
+# energy_joules = time_of_flight(distance, time_ns, mass_neutron, "m", "ns")[1]
+energy_joules = 0.5 * mass_neutron * (distance / (time_ns * 1e-9))**2
+energy_mev = energy_joules * joule_to_ev / 1e6
+
+plt.scatter(energy_mev, net_data, label = "Net Spectrum")
+plt.xlabel("Neutron Energy (MeV)")
+plt.ylabel("Counts (Normalized)")
+plt.yscale('log')
+# plt.xlim(0,20)
+# plt.show()
+
+'''
 plt.plot(bare_tof_data, label = "Bare Spectrum")
 plt.plot(shadowbar_tof_data, label = "Shadowbar Spectrum")
 plt.plot(calibration_tof_data, label = "Calibration Spectrum")
 plt.yscale('log')
 plt.title("Raw TOF Spectra")
-# plt.show()
+plt.show()
 plt.clf()
 net_data = bare_tof_data - shadowbar_tof_data
 
@@ -94,7 +162,7 @@ plt.yscale('log')
 plt.ylim(bottom = 1e1)
 plt.xlim(-1500, 2000)
 plt.show()
-
+'''
 
 
 
@@ -119,7 +187,27 @@ plt.show()
 where_not_0 = np.where(net_data>0)
 net_data = net_data[where_not_0]
 channels = np.arange(len(net_data))
+
+
 big_peak_index = np.argmax(net_data)
+mini_peak_index = big_peak_index + 163
+
+peak_channel_difference = mini_peak_index - big_peak_index
+time_channel_difference = minimum_energy_time - maximum_energy_time
+
+print(f"Peak Channel Difference: {peak_channel_difference}")
+print(f"Time Channel Difference: {time_channel_difference}")
+
+justin_factor = time_channel_difference / peak_channel_difference
+print(f"Justin Factor (ns/channel): {justin_factor}")
+
+distance_from_0 = maximum_energy_time / justin_factor 
+
+channels_of_0 = round(big_peak_index - distance_from_0)
+print(f"Channels of 0 ns: {channels_of_0}")
+
+
+
 end_of_left_contium_index = big_peak_index -50
 start_of_left_contium_index = end_of_left_contium_index - 360
 index_of_0 = round(np.average([start_of_left_contium_index, end_of_left_contium_index]))
@@ -131,6 +219,10 @@ net_data = np.where(net_data <0, 0, net_data)
 channels = channels - index_of_0
 
 channel_to_ns = maximum_energy_time / channels[big_peak_index]
+print(f"Channel to ns factor: {channel_to_ns} ns/channel")
+
+
+
 time_ns = channels * channel_to_ns
 
 plt.plot(time_ns,net_data)
@@ -141,7 +233,7 @@ plt.axvline(x=time_ns[big_peak_index],color='b', label = "6.4 MeV peak", linesty
 plt.xlabel("Time-of-Flight (ns)")
 plt.ylabel("Counts (Normalized)")
 # plt.yscale('log')
-# plt.show()
+plt.show()
 plt.clf()
 where_time_positive = np.where(time_ns > 0)
 time_ns = time_ns[where_time_positive]
@@ -155,5 +247,9 @@ plt.xlabel("Neutron Energy (MeV)")
 plt.ylabel("Counts (Normalized)")
 # plt.show()
 
+print(np.argmin(np.abs(time_ns- 40)) - np.argmin(np.abs(time_ns - 23.4257)))
+
 
 '''
+
+
