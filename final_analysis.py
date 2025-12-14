@@ -8,6 +8,7 @@ import os
 #data directories
 shadowbar_data_directory = "PuBe_ToF_12_8_25_Shadowbar"
 bare_data_directory = "PuBe_ToF_12_4_25_Bare/Filtered"
+calibration_directory = "TOF_calibration_Na22"
 
 #creating necessary directories
 final_plottting_directory = "Final_Analysis_Plots"
@@ -30,7 +31,7 @@ expected_highest_peak_time = 23.4257 # ns
 
 #retrieving TOF spectra from both datasets
 tof_spectra = []
-for data_directory in [shadowbar_data_directory, bare_data_directory]:
+for data_directory in [shadowbar_data_directory, bare_data_directory, calibration_directory]:
     filtered_files = sorted(os.listdir(data_directory))
     for file in filtered_files:
         spectrum_type = file.split("_")[2]
@@ -42,6 +43,7 @@ for data_directory in [shadowbar_data_directory, bare_data_directory]:
 
 shadowbar_tof_data = tof_spectra[0]
 bare_tof_data = tof_spectra[1]
+calibration_data = tof_spectra[2]/np.max(tof_spectra[2])
 
 #normalizing data by measurement time
 shadowbar_tof_data = shadowbar_tof_data / shadowbar_measurement_time
@@ -51,6 +53,7 @@ bare_tof_data = bare_tof_data / bare_measurement_time
 #applying boxcar moving average filter to data to smooth out fluctuations
 shadowbar_tof_data = boxcar_average_numpy(shadowbar_tof_data, window_size=5)
 bare_tof_data = boxcar_average_numpy(bare_tof_data, window_size=5)
+
 
 net_data = bare_tof_data - shadowbar_tof_data
 channels = np.arange(len(net_data))
@@ -70,18 +73,22 @@ large_peak_channel = where_not_0[0][large_peak_index]
 
 #remvoing baseline average from net data
 net_data = net_data - baseline_average
-net_data = np.where(net_data < 0, 0, net_data) * 48 * 3600  # converting to counts per 48 hours
+net_data = np.where(net_data < 0, 0, net_data)/np.max(net_data) #* 48 * 3600  # converting to counts per 48 hours
 
 net_data2 = boxcar_average_numpy(net_data, window_size=1000)
 
 
 
 
-plt.plot(time, net_data,  label="Net Spectrum (Bare - Shadowbar)")
+fig, ax = plt.subplots()
+
+ax.plot(time, net_data,  label="Net Spectrum (Bare - Shadowbar)")
+ax.plot(np.arange(len(calibration_data)), calibration_data)
+ax.axvline(time[large_peak_index], 0, 1, color='k')
 # plt.plot(time, net_data2, label="Smoothed Net Spectrum")
-plt.legend()
-plt.xlabel("Time of Flight (ns)")
-plt.ylabel("Counts per Second")
+ax.legend()
+ax.set_xlabel("Time of Flight (ns)")
+ax.set_ylabel("Counts per Second")
 # plt.axhline(y=baseline_average, color='r', linestyle='--', label="Baseline Average")
 # plt.yscale("log")
 plt.show()
