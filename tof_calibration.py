@@ -101,7 +101,7 @@ modded_energy_data =  piecewise_modification(energy_joules, net_data, x_value_cu
 
 print(type(energy_joules))
 plt.plot(relativistic_energy_joules, net_data, label = "Net TOF Data (Bare - Shadowbar)", color='blue')
-plt.plot(relativistic_energy_joules, modded_energy_data, label = "Modified Net TOF Data (Bare - Shadowbar)", color='orange')
+# plt.plot(relativistic_energy_joules, modded_energy_data, label = "Modified Net TOF Data (Bare - Shadowbar)", color='orange')
 plt.axvline(x = max_neutron_energy, color='r', linestyle='--', label='Maximum Neutron Energy')
 plt.axvline(x = min_neutron_energy, color='g', linestyle='--', label='Minimum Neutron Energy')
 plt.xlim(0, 12)
